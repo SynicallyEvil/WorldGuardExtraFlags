@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -31,6 +32,10 @@ import net.goldtreeservers.worldguardextraflags.flags.Flags;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 @RequiredArgsConstructor
 public class EntityListener implements Listener
 {
@@ -38,40 +43,28 @@ public class EntityListener implements Listener
 	private final RegionContainer regionContainer;
 	private final SessionManager sessionManager;
 
+	private final Set<UUID> skipNextDamage = new HashSet<>();
+
 	@EventHandler(ignoreCancelled = true)
 	public void onEntityKnockback(EntityDamageByEntityEvent event){
-		/*Entity entity = event.getEntity();
+		if (!(event.getDamager() instanceof Player damager)) return;
+		if (!(event.getEntity() instanceof LivingEntity entity)) return;
 
-		if(entity instanceof Player player) {
-			LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(player);
+		if (skipNextDamage.remove(entity.getUniqueId())) return;
 
-			ApplicableRegionSet regions = this.regionContainer.createQuery().getApplicableRegions(localPlayer.getLocation());
-			Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_KNOCKBACK);
-
-			if(allowKnockback != null && !allowKnockback) {
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						player.setVelocity(player.getVelocity().setX(0).setY(0).setZ(0));
-					}
-				}.runTaskLater(worldGuardPlugin, 1L);
-			}
-		}*/
-	}
-
-	@EventHandler
-	public void onInteract(PlayerInteractEvent event){
-		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
+		ItemStack item = damager.getInventory().getItemInMainHand();
 		if (item == null || item.getType() == Material.AIR || !item.getEnchantments().containsKey(Enchantment.WIND_BURST))
 			return;
 
-		LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(player);
+		LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(damager);
 		ApplicableRegionSet regions = this.regionContainer.createQuery().getApplicableRegions(localPlayer.getLocation());
 		Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_KNOCKBACK);
-
-		if (allowKnockback != null && !allowKnockback)
+		if (allowKnockback != null && !allowKnockback) {
 			event.setCancelled(true);
+
+			skipNextDamage.add(entity.getUniqueId());
+			entity.damage(event.getDamage(), damager);
+		}
 	}
 
 	@EventHandler
