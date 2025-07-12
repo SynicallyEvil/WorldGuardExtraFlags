@@ -86,6 +86,7 @@ public class WorldGuardExtraFlagsPlugin extends JavaPlugin
 			flagRegistry.register(Flags.CHUNK_UNLOAD);
 			flagRegistry.register(Flags.ITEM_DURABILITY);
 			flagRegistry.register(Flags.JOIN_LOCATION);
+			flagRegistry.register(Flags.ALLOW_KNOCKBACK);
 		}
 		catch (Exception e)
 		{

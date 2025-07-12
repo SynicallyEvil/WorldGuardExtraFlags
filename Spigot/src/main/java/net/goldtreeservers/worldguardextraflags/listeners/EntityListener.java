@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 
@@ -23,6 +24,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.goldtreeservers.worldguardextraflags.WorldGuardExtraFlagsPlugin;
 import net.goldtreeservers.worldguardextraflags.flags.Flags;
+import org.bukkit.scheduler.BukkitRunnable;
 
 @RequiredArgsConstructor
 public class EntityListener implements Listener
@@ -30,6 +32,29 @@ public class EntityListener implements Listener
 	private final WorldGuardPlugin worldGuardPlugin;
 	private final RegionContainer regionContainer;
 	private final SessionManager sessionManager;
+
+	@EventHandler(ignoreCancelled = true)
+	public void onEntityKnockback(EntityDamageByEntityEvent event){
+		Entity entity = event.getEntity();
+
+		if(entity instanceof Player player) {
+			LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(player);
+			if (this.sessionManager.hasBypass(localPlayer, localPlayer.getWorld())) {
+				return;
+			}
+			ApplicableRegionSet regions = this.regionContainer.createQuery().getApplicableRegions(localPlayer.getLocation());
+			Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_KNOCKBACK);
+
+			if(allowKnockback != null && !allowKnockback) {
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						player.setVelocity(player.getVelocity().setX(0).setY(0).setZ(0));
+					}
+				}.runTaskLater(worldGuardPlugin, 1L);
+			}
+		}
+	}
 
 	@EventHandler(ignoreCancelled = true)
 	public void onPortalCreateEvent(PortalCreateEvent event)

@@ -32,7 +32,8 @@ public final class Flags
 	
 	public final static BooleanFlag KEEP_INVENTORY = new BooleanFlag("keep-inventory");
 	public final static BooleanFlag KEEP_EXP = new BooleanFlag("keep-exp");
-	
+	public final static BooleanFlag ALLOW_KNOCKBACK = new BooleanFlag("allow-knockback");
+
 	public final static StringFlag CHAT_PREFIX = new StringFlag("chat-prefix");
 	public final static StringFlag CHAT_SUFFIX = new StringFlag("chat-suffix");
 	
