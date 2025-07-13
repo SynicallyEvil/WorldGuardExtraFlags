@@ -58,25 +58,12 @@ public class EntityListener implements Listener
 
 		LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(damager);
 		ApplicableRegionSet regions = this.regionContainer.createQuery().getApplicableRegions(localPlayer.getLocation());
-		Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_KNOCKBACK);
+		Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_WIND_BURST);
 		if (allowKnockback != null && !allowKnockback) {
 			event.setCancelled(true);
 
 			skipNextDamage.add(entity.getUniqueId());
 			entity.damage(event.getDamage(), damager);
-		}
-	}
-
-	@EventHandler
-	public void onPlayerVelocity(PlayerVelocityEvent event){
-		Player player = event.getPlayer();
-		LocalPlayer localPlayer = this.worldGuardPlugin.wrapPlayer(player);
-
-		ApplicableRegionSet regions = this.regionContainer.createQuery().getApplicableRegions(localPlayer.getLocation());
-		Boolean allowKnockback = regions.queryValue(localPlayer, Flags.ALLOW_KNOCKBACK);
-
-		if (allowKnockback != null && !allowKnockback) {
-			event.setCancelled(true);
 		}
 	}
 
