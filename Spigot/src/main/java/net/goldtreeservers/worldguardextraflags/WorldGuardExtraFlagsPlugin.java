@@ -87,6 +87,7 @@ public class WorldGuardExtraFlagsPlugin extends JavaPlugin
 			flagRegistry.register(Flags.ITEM_DURABILITY);
 			flagRegistry.register(Flags.JOIN_LOCATION);
 			flagRegistry.register(Flags.ALLOW_WIND_BURST);
+			flagRegistry.register(Flags.DESTROY_ITEMS);
 		}
 		catch (Exception e)
 		{

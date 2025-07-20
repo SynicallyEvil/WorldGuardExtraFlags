@@ -1,6 +1,8 @@
 package net.goldtreeservers.worldguardextraflags.listeners;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -11,12 +13,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
@@ -64,6 +65,17 @@ public class EntityListener implements Listener
 
 			skipNextDamage.add(entity.getUniqueId());
 			entity.damage(event.getDamage(), damager);
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onItemDamage(EntityDamageEvent event){
+		if (event.getEntityType() != EntityType.ITEM) return;
+
+		Location location = BukkitAdapter.adapt(event.getEntity().getLocation());
+		Boolean destroyItems = this.regionContainer.createQuery().queryValue(location, null, Flags.DESTROY_ITEMS);
+		if (destroyItems != null && !destroyItems) {
+			event.setCancelled(true);
 		}
 	}
 
